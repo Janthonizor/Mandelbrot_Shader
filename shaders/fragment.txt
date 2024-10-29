@@ -1,0 +1,43 @@
+#version 450 core
+
+out vec4 screenColor;
+
+uniform float u_time;
+uniform dvec2 center;
+uniform float zoom;
+
+void main() {
+    vec2 resolution = vec2(640.0 * 2.0, 480.0 * 2.0);
+    vec2 xy = vec2(gl_FragCoord.xy);
+    dvec2 uv = (xy / resolution - 0.5) * 4.0 / (zoom * zoom) + center;
+    uv.x *= resolution.x / resolution.y;
+
+
+
+    dvec2 z = dvec2(0.0, 0.0);
+    int iterations = 0;
+    int maxIterations = int(400 +  10*zoom); 
+
+    double z2; 
+    
+    for (iterations = 0; iterations < maxIterations; iterations++) {
+        z2 = dot(z,z); 
+        if (z2 > 4.0) break;
+        z = dvec2(z.x * z.x - z.y * z.y + uv.x, 2.0 * z.x * z.y + uv.y);
+    }
+
+    
+    float colorFactor = 0.5 + 0.5 * sin(0.2 * float(iterations%(15 + int(zoom * zoom))) + u_time);
+    float escape_weight = 0.2 + 0.8 * float(iterations)/ float(maxIterations);
+    vec3 col = vec3(
+        colorFactor * escape_weight,
+        (1-colorFactor) * escape_weight,
+        (0.5 + 0.5 * cos(1-colorFactor))*escape_weight
+    );
+
+    if (iterations > maxIterations * 0.99) {
+        col = vec3(0.0);
+    }
+
+    screenColor = vec4(col, 1.0);
+};
