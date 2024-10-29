@@ -1,53 +1,6 @@
 from config import *
 import mesh_builder
 
-'''
-class Cube:
-    def __init__(self, position, eulers):
-        self.position = np.array(position, dtype=np.float32)
-        self.eulers = np.array(eulers, dtype=np.float32)
-
-class Eye:
-
-    def __init__(self, position):
-        self.position = np.array(position, dtype=np.float32)
-        self.theta = 0
-        self.phi = 0
-        self.update_vectors()
-
-    def update_vectors(self):
-
-        self.forwards = np.array(
-            [
-                np.cos(np.deg2rad(self.theta)) * np.cos(np.deg2rad(self.phi)),
-                np.sin(np.deg2rad(self.theta)) * np.cos(np.deg2rad(self.phi)),
-                np.sin(np.deg2rad(self.phi))
-            ]
-        )
-        globalUp = np.array([0,0,1], dtype=np.float32)
-        self.right = np.cross(self.forwards, globalUp) 
-        self.up = np.cross(self.right, self.forwards)   
-
-class Scene:
-
-    def __init__(self):
-
-        self.cubes = [
-            Cube (
-                position = [6,0,0],
-                eulers = [0,0,0]
-            )
-        ]
-        self.eye = Eye(position=[0,0,2])
-
-    def update(self, rate):
-
-        for cube in self.cubes:
-            cube.eulers[1] += 0.25 * rate
-            if cube.eulers[1] > 360:
-                cube.eulers[1] -= 360
-
-'''
 
 class App:
 
@@ -80,7 +33,7 @@ class App:
         glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
         #self.triangle_vbo, self.triangle_vao = mesh_builder.build_triangle_mesh()
         self.quad_ebo, self.quad_vbo, self.quad_vao = mesh_builder.build_quad_mesh()
-        self.shader = create_shader_program("Mandelbrot_Shader/shaders/vertex.txt", "Mandelbrot_Shader/shaders/fragment.txt")
+        self.shader = create_shader_program("shaders/vertex.txt", "shaders/fragment.txt")
         self.u_time_location = glGetUniformLocation(self.shader, "u_time")
         
         
@@ -88,7 +41,7 @@ class App:
         last_time = glfw.get_time()
         while not glfw.window_should_close(self.window):
             pan_speed = 0.04 / self.eye_zoom
-            zoom_speed = 1.033
+            zoom_speed = 1.02
             # Measure the time for each frame
             current_time = glfw.get_time()
             frame_duration = current_time - last_time
@@ -96,7 +49,7 @@ class App:
 
             # Calculate FPS
             fps = 1.0 / frame_duration if frame_duration > 0 else 0
-            glfw.set_window_title(self.window, f"Zoom: {self.eye_zoom:.2f} x  -  Center: ( {self.eye_position[0]:.3f} + {self.eye_position[1]:.3f} i )  -  Render - FPS: {fps:.2f}")
+            glfw.set_window_title(self.window, f"Zoom: {self.eye_zoom:.1f} x  -  Center: ( {self.eye_position[0]:.5f} + {self.eye_position[1]:.5f} i )  -  Render - FPS: {fps:.2f}")
 
             if glfw.get_key(self.window, GLFW_CONSTANTS.GLFW_KEY_ESCAPE) == GLFW_CONSTANTS.GLFW_PRESS:
                 break
@@ -125,7 +78,7 @@ class App:
             self.eye_position[1] = max(-2.0, min(2.0, self.eye_position[1]))
 
             # Apply zoom limits
-            self.eye_zoom = max(1.0, min(100000.0, self.eye_zoom))
+            self.eye_zoom = max(1.0, min(1000000000000.0, self.eye_zoom))
 
 
             glfw.poll_events()
@@ -147,9 +100,8 @@ class App:
         self.quit()
 
     def quit(self):
-        #glDeleteBuffers(1, (self.triangle_vbo,))
+
         glDeleteBuffers(2, (self.quad_ebo, self.quad_vbo))
-        #glDeleteVertexArrays(1, (self.triangle_vao,))
         glDeleteVertexArrays(1, (self.quad_vao,))
         glDeleteProgram(self.shader)
         glfw.destroy_window(self.window)

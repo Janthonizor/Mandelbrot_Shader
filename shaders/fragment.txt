@@ -2,8 +2,10 @@
 
 out vec4 screenColor;
 
-uniform float u_time;
+uniform int last_iteration;
 uniform dvec2 center;
+uniform dvec2 last_z;
+uniform float u_time;
 uniform float zoom;
 
 void main() {
@@ -13,10 +15,9 @@ void main() {
     uv.x *= resolution.x / resolution.y;
 
 
-
     dvec2 z = dvec2(0.0, 0.0);
     int iterations = 0;
-    int maxIterations = int(400 +  10*zoom); 
+    int maxIterations = int(200 +  8*zoom); 
 
     double z2; 
     
@@ -28,7 +29,7 @@ void main() {
 
     
     float colorFactor = 0.5 + 0.5 * sin(0.2 * float(iterations%(15 + int(zoom * zoom))) + u_time);
-    float escape_weight = 0.2 + 0.8 * float(iterations)/ float(maxIterations);
+    float escape_weight = (0.4 + 0.6 * float(iterations)/ float(maxIterations));
     vec3 col = vec3(
         colorFactor * escape_weight,
         (1-colorFactor) * escape_weight,
